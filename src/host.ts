@@ -103,6 +103,17 @@ export class P2PHost {
   unregisterClient(client: Client): void {
     const { credentials, playerID } = client.metadata;
     this.clients.delete(client);
+
+    const { metadata } = this.db.fetch(this.matchID);
+
+    // Remove metadata about the player
+    if (playerID) {
+      const parsedID = Number.parseInt(playerID);
+      if (metadata.players[parsedID]) {
+        delete metadata.players[parsedID].credentials;
+      }
+    }
+
     this.master.onConnectionChange(this.matchID, playerID, credentials, false);
   }
 
