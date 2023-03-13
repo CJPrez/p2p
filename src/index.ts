@@ -79,7 +79,7 @@ class P2PTransport extends Transport {
   private peer: Peer | null = null;
   private peerOptions: PeerJSOption;
   private onError: (error: PeerError) => void;
-  private isHost: boolean;
+  private isHost?: boolean;
   private game: Game;
   private emit?: (data: ClientAction) => void;
   private retryHandler: BackoffScheduler;
@@ -180,6 +180,14 @@ class P2PTransport extends Transport {
       this.peer.on("open", () => void this.connectToHost());
       this.peer.on("error", (err) => {
         const error = err as PeerError;
+
+        // If isHost is undefined and the peer isn't available, then reconnect as host
+        if (error.type === "peer-unavailable" && this.isHost === undefined) {
+          this.isHost = true;
+          this.reconnect();
+          return;
+        }
+
         if (error.type === "network" || error.type === "peer-unavailable") {
           this.retryHandler.schedule(() => void this.connectToHost());
         } else {
