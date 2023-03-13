@@ -95,7 +95,7 @@ class P2PTransport extends Transport {
     ...opts
   }: TransportOpts & P2POpts) {
     super(opts);
-    this.isHost = Boolean(isHost);
+    this.isHost = isHost === undefined ? isHost : Boolean(isHost);
     this.onError = onError;
     this.peerOptions = peerOptions;
     this.game = opts.game;
